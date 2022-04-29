@@ -1,0 +1,61 @@
+# Optional - Import os to update pip and install beautiful soup
+
+# import os
+# os.system('pip3 install --upgrade pip')
+# os.system('pip3 install requests')
+# os.system('pip3 install beautifulsoup4')
+# os.system('pip3 install lxml')
+
+# Import libraries
+
+from bs4 import BeautifulSoup
+import requests
+
+# Set the URL to perform the get request
+
+URL = 'https://www.gov.uk/government/collections/tax-treaties'
+
+# Make get request for HTML information
+
+URL_page = requests.get(URL)
+
+# Load the page contents
+
+page_text = URL_page.content
+
+# Make a soup object using beautiful soup and mark by parsing with lxml method (alternative 'html.parser')
+
+soup = BeautifulSoup(page_text, 'lxml')
+
+# Find treaty country details in beautiful soup
+
+treaty_country = soup.find_all('ul', class_="gem-c-document-list")
+
+# Find URLs and detail for treaty countries
+
+for country in treaty_country:
+
+    # Remove ':' in country detail
+
+    country_header = country.li.a.text.replace(':', '')
+
+    # Filter by checking if 'tax treaties' in country detail as Lesotho did not have ':'
+
+    if 'tax treaties' in country_header:
+        # Remove 'tax treaties' suffix as no longer needed for filter
+
+        country_name = country_header.removesuffix('tax treaties')
+
+        # Create URL as full URL not provided
+
+        country_URL = 'https://www.gov.uk' + country.li.a['data-track-label']
+
+        # Strip away space after date
+
+        last_modified = country.ul.li.time.text.strip()
+
+        print(f"Treaty: {country_header}")
+        print(f"Last Modified Date: {last_modified}")
+        print(f"Country Name: {country_name}")
+        print(f"Country URL: {country_URL}")
+        print()
